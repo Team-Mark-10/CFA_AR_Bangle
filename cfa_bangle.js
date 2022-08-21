@@ -93,7 +93,11 @@ function advertiseHRM() {
   console.log(Bangle.bleAdvert);
 
   updateDraw(bpm);
-  NRF.setAdvertising(Bangle.bleAdvert);
+
+  NRF.setAdvertising(Bangle.bleAdvert, {
+    manufacturer:0x0590,
+    manufacturerData:"CFA"
+  });
 }
 
 g.clear();
