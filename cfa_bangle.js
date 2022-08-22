@@ -1,6 +1,7 @@
 //##################################
 //Inital variables to set for heart rate graph.
 var data = []; // Stores bpm data in queue.
+var conf_data = [];
 var W = 200;
 var startX = 25;
 var padding = 10;
@@ -52,6 +53,7 @@ function renderGraph(data) {
     var ny = startY + H - (data[i] / MAX_BPM) * H;
     var nx = padding + startX + i * (W / data.length);
 
+    g.setColor(1 - (conf_data[i] / 100), conf_data[i] / 100, 0);
     g.drawLine(lx, ly, nx, ny);
     g.drawString(data[i], nx, ny - 10);
     ly = ny;
@@ -67,6 +69,7 @@ function updateDraw(bpm) {
     data.shift();
   }
   data.push(bpm);
+  conf_data.push(bpm_conf);
 
   renderGraph(data);
 }
