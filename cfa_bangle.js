@@ -1,6 +1,7 @@
 //##################################
 //Inital variables to set for heart rate graph.
 var data = []; // Stores bpm data in queue.
+var conf_data = [];
 var W = 200;
 var startX = 25;
 var padding = 10;
@@ -52,6 +53,7 @@ function renderGraph(data) {
     var ny = startY + H - (data[i] / MAX_BPM) * H;
     var nx = padding + startX + i * (W / data.length);
 
+    g.setColor(1 - (conf_data[i] / 100), conf_data[i] / 100, 0);
     g.drawLine(lx, ly, nx, ny);
     g.drawString(data[i], nx, ny - 10);
     ly = ny;
@@ -67,6 +69,7 @@ function updateDraw(bpm) {
     data.shift();
   }
   data.push(bpm);
+  conf_data.push(bpm_conf);
 
   renderGraph(data);
 }
@@ -75,6 +78,7 @@ function updateDraw(bpm) {
 var ADVERTISE_INTERVAL_SECONDS = 5;
 
 var bpm = 0;
+var bpm_conf = 0;
 
 //turns power to the HRM on, this should be turned off when ever not needed.
 Bangle.setHRMPower(1);
@@ -83,11 +87,12 @@ if (!Bangle.bleAdvert) Bangle.bleAdvert = {};
 
 Bangle.on("HRM", function (hrm) {
   bpm = hrm.bpm;
+  bpm_conf = hrm.confidence;
 });
 
 function advertiseHRM() {
   // 0x180D is the Heart Rate Service as defined in the Bluetooth SIG specification.
-  Bangle.bleAdvert["0x180D"] = [bpm];
+  Bangle.bleAdvert["0x180D"] = [bpm,bpm_conf];
 
   // Displays debug message to Bangle screen
   console.log(Bangle.bleAdvert);
