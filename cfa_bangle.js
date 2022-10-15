@@ -90,10 +90,18 @@ Bangle.on("HRM", function (hrm) {
   bpm_conf = hrm.confidence;
 });
 
+var accel_mag = 0;
+
+Bangle.on("accel", function (data) {
+  accel_mag = data.mag;
+});
+
+
 function advertiseHRM() {
   // 0x180D is the Heart Rate Service as defined in the Bluetooth SIG specification.
   Bangle.bleAdvert["0x180D"] = [bpm,bpm_conf];
-
+  Bangle.bleAdvert["0x2713"] = [accel_mag, 1];
+	
   // Displays debug message to Bangle screen
   console.log(Bangle.bleAdvert);
 
