@@ -82,6 +82,7 @@ var bpm_conf = 0;
 
 //turns power to the HRM on, this should be turned off when ever not needed.
 Bangle.setHRMPower(1);
+Bangle.setGPSPower(1);
 
 if (!Bangle.bleAdvert) Bangle.bleAdvert = {};
 
@@ -96,12 +97,19 @@ Bangle.on("accel", function (data) {
   accel_mag = data.mag;
 });
 
+var speed = 0;
+
+Bangle.on("GPS", function (fix) {
+  speed = fix.speed;
+});
 
 function advertiseHRM() {
   // 0x180D is the Heart Rate Service as defined in the Bluetooth SIG specification.
   Bangle.bleAdvert["0x180D"] = [bpm,bpm_conf];
   Bangle.bleAdvert["0x2713"] = [accel_mag, 1];
-	
+  Bangle.bleAdvert["0x2A67"] = [speed, 1];
+
+
   // Displays debug message to Bangle screen
   console.log(Bangle.bleAdvert);
 
