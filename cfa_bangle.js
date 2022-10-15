@@ -53,7 +53,7 @@ function renderGraph(data) {
     var ny = startY + H - (data[i] / MAX_BPM) * H;
     var nx = padding + startX + i * (W / data.length);
 
-    g.setColor(1 - (conf_data[i] / 100), conf_data[i] / 100, 0);
+    g.setColor(1 - conf_data[i] / 100, conf_data[i] / 100, 0);
     g.drawLine(lx, ly, nx, ny);
     g.drawString(data[i], nx, ny - 10);
     ly = ny;
@@ -82,7 +82,6 @@ var bpm_conf = 0;
 
 //turns power to the HRM on, this should be turned off when ever not needed.
 Bangle.setHRMPower(1);
-Bangle.setGPSPower(1);
 
 if (!Bangle.bleAdvert) Bangle.bleAdvert = {};
 
@@ -97,32 +96,41 @@ Bangle.on("accel", function (data) {
   accel_mag = data.mag;
 });
 
-var speed = 0;
+function floatToUint8ByteArray(value) {
+  var arr = Float32Array(1);
+  arr[0] = value;
 
-Bangle.on("GPS", function (fix) {
-  speed = fix.speed;
-});
+  return new Uint8Array(arr.buffer);
+}
+
+function intToUint8ByteArray(value) {
+  var arr = Uint32Array(1);
+  arr[0] = value;
+
+  return new Uint8Array(arr.buffer);
+}
 
 function advertiseHRM() {
   // 0x180D is the Heart Rate Service as defined in the Bluetooth SIG specification.
-  Bangle.bleAdvert["0x180D"] = [bpm,bpm_conf];
-  Bangle.bleAdvert["0x2713"] = [accel_mag, 1];
-  Bangle.bleAdvert["0x2A67"] = [speed, 1];
 
+  var ad_data = [
+    { "0x180D": [intToUint8ByteArray(bpm), bpm_conf] },
+    { "0x2713": [floatToUint8ByteArray(accel_mag), 1] },
+  ];
 
-  // Displays debug message to Bangle screen
-  console.log(Bangle.bleAdvert);
+  console.log(ad_data);
+
+  NRF.setAdvertising(ad_data, {
+    manufacturer: 0x0590,
+    manufacturerData: "CFA",
+  });
 
   updateDraw(bpm);
-
-  NRF.setAdvertising(Bangle.bleAdvert, {
-    manufacturer:0x0590,
-    manufacturerData:"CFA"
-  });
 }
 
 g.clear();
 layout.render();
 
 setInterval(advertiseHRM, ADVERTISE_INTERVAL_SECONDS * 1000);
+
 advertiseHRM();
