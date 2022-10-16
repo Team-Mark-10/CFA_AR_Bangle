@@ -107,8 +107,8 @@ function advertiseHRM() {
   // 0x180D is the Heart Rate Service as defined in the Bluetooth SIG specification.
 
   var ad_data = [
-    { "0x180D": [floatToUint8ByteArray(bpm), 0, bpm_conf] },
-    { "0x2713": [floatToUint8ByteArray(accel_mag), 1, 1] },
+    { "0x180D": [floatToUint8ByteArray(bpm), bpm_conf] },
+    { "0x2713": [floatToUint8ByteArray(accel_mag), 100] },
   ];
 
   console.log(ad_data);
